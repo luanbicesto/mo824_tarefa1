@@ -2,6 +2,7 @@ package problems.qbf.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import metaheuristics.grasp.AbstractGRASP;
 import problems.qbf.QBF_Inverse;
@@ -158,6 +159,42 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 		return null;
 	}
 
+	public void repair() {
+	    Solution<Integer> incumbentSolCopy = new Solution<Integer>(incumbentSol);
+	    
+	    incumbentSolCopy.sort(new Comparator<Integer>() {
+	        @Override
+	        public int compare(Integer element1, Integer element2)
+	        {
+
+	            return  element1.compareTo(element2);
+	        }
+        });
+	    
+	    /*Simplest repair: remove the right element that is incorrect*/
+	    for(int index = 0; index < incumbentSolCopy.size(); index++) {
+	        if(index < (incumbentSolCopy.size() - 1) && applyAdjacentConstraint(incumbentSolCopy, index)) {
+	            removeElementByValue(incumbentSol, incumbentSolCopy.get(index + 1));
+	            incumbentSolCopy.remove(index + 1);
+	        }
+	    }
+	    
+	    ObjFunction.evaluate(incumbentSol);
+	}
+	
+	public void removeElementByValue(Solution<Integer> solution, int targetValue) {
+	    for(int index = 0; index < solution.size(); index++) {
+	        if(solution.get(index).intValue() == targetValue) {
+	            solution.remove(index);
+	            break;
+	        }
+	    }
+	}
+	
+	private boolean applyAdjacentConstraint(Solution<Integer> currentSolution, int currentIndex) {
+	    return currentSolution.get(currentIndex) + 1 == currentSolution.get(currentIndex+1);
+	}
+	
 	/**
 	 * A main method used for testing the GRASP metaheuristic.
 	 * 
