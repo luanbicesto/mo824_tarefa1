@@ -28,7 +28,7 @@ public abstract class AbstractGRASP<E> {
 	/**
 	 * a random number generator
 	 */
-	static Random rng = new Random(0);
+	protected static Random rng = new Random(0);
 
 	/**
 	 * the objective function being optimized
@@ -74,6 +74,8 @@ public abstract class AbstractGRASP<E> {
 	 * the Restricted Candidate List of elements to enter the solution.
 	 */
 	protected ArrayList<E> RCL;
+	
+	protected ArrayList<Integer> CLTrash;
 
 	/**
 	 * Creates the Candidate List, which is an ArrayList of candidate elements
@@ -147,6 +149,7 @@ public abstract class AbstractGRASP<E> {
 
 		CL = makeCL();
 		RCL = makeRCL();
+		CLTrash = new ArrayList<Integer>();
 		incumbentSol = createEmptySol();
 		incumbentCost = Double.POSITIVE_INFINITY;
 
@@ -207,6 +210,7 @@ public abstract class AbstractGRASP<E> {
 			constructiveHeuristic();
 			repair();
 			localSearch();
+			//repair();
 			if (bestSol.cost > incumbentSol.cost) {
 				bestSol = new Solution<E>(incumbentSol);
 				if (verbose)

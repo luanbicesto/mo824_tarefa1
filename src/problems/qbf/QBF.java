@@ -283,8 +283,7 @@ public class QBF implements Evaluator<Integer> {
 		for (int i = 0; i < _size; i++) {
 			for (int j = i; j < _size; j++) {
 				stok.nextToken();
-				A[i][j] = (-1) * stok.nval;
-				//A[i][j] = stok.nval;
+				A[i][j] = stok.nval;
 				//A[j][i] = A[i][j];
 				if (j>i)
 					A[j][i] = 0.0;
