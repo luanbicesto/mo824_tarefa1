@@ -21,7 +21,7 @@ import solutions.Solution;
 public class GRASP_QBF extends AbstractGRASP<Integer> {
 
     private static final int REPAIR_FREQUENCY_SIZE = 4;
-    private static final int ADD_CL_FREQUENCY_SIZE = 5;
+    private static final int ADD_CL_FREQUENCY_SIZE = 8;
     
 	/**
 	 * Constructor for the GRASP_QBF class. An inverse QBF objective function is
@@ -115,6 +115,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 		Integer candInTrash = null;
 		Integer bestCandIn = null, bestCandOut = null;
 		int repairFrequency = rng.nextInt(REPAIR_FREQUENCY_SIZE) + 1;
+		int addToClFrequency = getAddToClFrequency();
 		CLTrash = new ArrayList<Integer>();
 
 		do {
@@ -133,9 +134,11 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 				}
 			}
 			
-			if(applyAddClCount == ADD_CL_FREQUENCY_SIZE) {
+			if(applyAddClCount == addToClFrequency) {
 			    applyAddClCount = 0;
+			    addToClFrequency = getAddToClFrequency();
 			    // Evaluate insertions from trash list
+			   
 	            for (Integer candIn : CLTrash) {
 	                double deltaCost = ObjFunction.evaluateInsertionCost(candIn, incumbentSol);
 	                if (deltaCost < minDeltaCost) {
@@ -193,8 +196,12 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 		repair();
 		return null;
 	}
+	
+	private int getAddToClFrequency() {
+	    return rng.nextInt(ADD_CL_FREQUENCY_SIZE - REPAIR_FREQUENCY_SIZE) + REPAIR_FREQUENCY_SIZE;
+	}
 
-	public void repair() {
+ 	public void repair() {
 	    //simplestRepair();
 	    //windowSizeTwo();
 	    randomizedSimplestRepair();
