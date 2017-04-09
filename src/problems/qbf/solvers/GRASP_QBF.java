@@ -22,6 +22,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 
     private static final int REPAIR_FREQUENCY_SIZE = 4;
     private static final int ADD_CL_FREQUENCY_SIZE = 8;
+    private static final int ADD_CL_CONSTANT_SIZE = 5;
     
 	/**
 	 * Constructor for the GRASP_QBF class. An inverse QBF objective function is
@@ -116,7 +117,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 		Integer bestCandIn = null, bestCandOut = null;
 		int repairFrequency = rng.nextInt(REPAIR_FREQUENCY_SIZE) + 1;
 		int addToClFrequency = getAddToClFrequency();
-		CLTrash = new ArrayList<Integer>();
+		CLRemovedVariables = new ArrayList<Integer>();
 
 		do {
 			minDeltaCost = Double.POSITIVE_INFINITY;
@@ -136,10 +137,10 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 			
 			if(applyAddClCount == addToClFrequency) {
 			    applyAddClCount = 0;
-			    addToClFrequency = getAddToClFrequency();
+			    addToClFrequency = Double.compare(rng.nextDouble(), 0.1) <= 0 ? getAddToClFrequency() : ADD_CL_CONSTANT_SIZE;
 			    // Evaluate insertions from trash list
 			   
-	            for (Integer candIn : CLTrash) {
+	            for (Integer candIn : CLRemovedVariables) {
 	                double deltaCost = ObjFunction.evaluateInsertionCost(candIn, incumbentSol);
 	                if (deltaCost < minDeltaCost) {
 	                    minDeltaCost = deltaCost;
@@ -178,7 +179,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 				}
 				if (bestCandIn != null) {
 				    if(bestCandIn == candInTrash) {
-				        CLTrash.remove(candInTrash);
+				        CLRemovedVariables.remove(candInTrash);
 				    }
 					incumbentSol.add(bestCandIn);
 					CL.remove(bestCandIn);
@@ -241,7 +242,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
                 removeCandIndexProb = rng.nextDouble();
                 removeCandIndex = Double.compare(removeCandIndexProb, 0.5) <= 0 ? index : index + 1;
                 
-                CLTrash.add(incumbentSolCopy.get(removeCandIndex));
+                CLRemovedVariables.add(incumbentSolCopy.get(removeCandIndex));
                 
                 removeElementByValue(incumbentSol, incumbentSolCopy.get(removeCandIndex));
                 incumbentSolCopy.remove(removeCandIndex);

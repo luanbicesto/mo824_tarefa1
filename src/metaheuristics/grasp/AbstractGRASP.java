@@ -75,7 +75,7 @@ public abstract class AbstractGRASP<E> {
 	 */
 	protected ArrayList<E> RCL;
 	
-	protected ArrayList<Integer> CLTrash;
+	protected ArrayList<Integer> CLRemovedVariables;
 
 	/**
 	 * Creates the Candidate List, which is an ArrayList of candidate elements
@@ -149,7 +149,7 @@ public abstract class AbstractGRASP<E> {
 
 		CL = makeCL();
 		RCL = makeRCL();
-		CLTrash = new ArrayList<Integer>();
+		CLRemovedVariables = new ArrayList<Integer>();
 		incumbentSol = createEmptySol();
 		incumbentCost = Double.POSITIVE_INFINITY;
 
