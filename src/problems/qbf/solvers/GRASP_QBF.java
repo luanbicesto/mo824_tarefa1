@@ -199,6 +199,94 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 		return null;
 	}
 	
+	@Override
+	public Solution<Integer> localSearchFirst() {
+
+	    int applyRepairCount = 0;
+	    int applyAddClCount = 0;
+		Double minDeltaCost;
+		Integer candInTrash = null;
+		Integer bestCandIn = null, bestCandOut = null;
+		int repairFrequency = rng.nextInt(REPAIR_FREQUENCY_SIZE) + 1;
+		int addToClFrequency = getAddToClFrequency();
+		CLRemovedVariables = new ArrayList<Integer>();
+		boolean finded;
+
+		do {
+			finded = false;
+			minDeltaCost = Double.POSITIVE_INFINITY;
+			updateCL();
+			applyRepairCount++;
+			applyAddClCount++;
+				
+			// Evaluate insertions
+			for (Integer candIn : CL) {
+				double deltaCost = ObjFunction.evaluateInsertionCost(candIn, incumbentSol);
+				if (deltaCost < minDeltaCost) {
+					minDeltaCost = deltaCost;
+					bestCandIn = candIn;
+					bestCandOut = null;
+					finded = true;
+					break;
+				}
+			}
+			
+			// Evaluate removals
+			if(!finded) {
+				for (Integer candOut : incumbentSol) {
+					double deltaCost = ObjFunction.evaluateRemovalCost(candOut, incumbentSol);
+					if (deltaCost < minDeltaCost) {
+						minDeltaCost = deltaCost;
+						bestCandIn = null;
+						bestCandOut = candOut;
+						finded = true;
+						break;
+					}
+				}
+			}
+			// Evaluate exchanges
+			if(!finded) {
+				for (Integer candIn : CL) {
+					for (Integer candOut : incumbentSol) {
+						double deltaCost = ObjFunction.evaluateExchangeCost(candIn, candOut, incumbentSol);
+						if (deltaCost < minDeltaCost) {
+							minDeltaCost = deltaCost;
+							bestCandIn = candIn;
+							bestCandOut = candOut;
+							finded = true;
+							break;
+						}
+					}
+				}
+			}
+			// Implement the best move, if it reduces the solution cost.
+			if (minDeltaCost < -Double.MIN_VALUE) {
+				if (bestCandOut != null) {
+					incumbentSol.remove(bestCandOut);
+					CL.add(bestCandOut);
+				}
+				if (bestCandIn != null) {
+				    if(bestCandIn == candInTrash) {
+				        CLRemovedVariables.remove(candInTrash);
+				    }
+					incumbentSol.add(bestCandIn);
+					CL.remove(bestCandIn);
+					count += 1;
+				}
+				if(applyRepairCount == repairFrequency) {
+				    repair();
+				    applyRepairCount = 0;
+				    repairFrequency = rng.nextInt(REPAIR_FREQUENCY_SIZE) + 1;
+				}
+				
+				ObjFunction.evaluate(incumbentSol);
+			}
+		} while (minDeltaCost < -Double.MIN_VALUE);
+
+		repair();
+		return null;
+	}
+	
 	private int getAddToClFrequency() {
 	    return rng.nextInt(ADD_CL_FREQUENCY_SIZE - REPAIR_FREQUENCY_SIZE) + REPAIR_FREQUENCY_SIZE;
 	}
@@ -295,7 +383,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	public static void main(String[] args) throws IOException {
 
 		long startTime = System.currentTimeMillis();
-		GRASP_QBF grasp = new GRASP_QBF(0.05, 10000, "instances/qbf080");
+		GRASP_QBF grasp = new GRASP_QBF(0.00, 1000, "instances/qbf080");
 		Solution<Integer> bestSol = grasp.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime   = System.currentTimeMillis();

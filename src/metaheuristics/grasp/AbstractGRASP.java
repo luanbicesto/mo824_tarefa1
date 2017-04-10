@@ -120,6 +120,7 @@ public abstract class AbstractGRASP<E> {
 	 * @return An local optimum solution.
 	 */
 	public abstract Solution<E> localSearch();
+	public abstract Solution<E> localSearchFirst();
 	
 	public abstract void repair();
 
@@ -194,7 +195,7 @@ public abstract class AbstractGRASP<E> {
 			count += 1;
 			rate = (double)count/len;
 			if( (rate >= 0.4 && rate <= 0.5) || rate >= 0.8 )
-				localSearch();
+				localSearchFirst();
 			incumbentSol.add(inCand);
 			ObjFunction.evaluate(incumbentSol); //we can remove this maybe, because there is another call to the same method above
 			RCL.clear();
@@ -215,8 +216,9 @@ public abstract class AbstractGRASP<E> {
 		bestSol = createEmptySol();
 		for (int i = 0; i < iterations; i++) {
 			constructiveHeuristic();
+		
 			repair();
-			localSearch();
+			localSearchFirst();
 			//repair();
 			if (bestSol.cost > incumbentSol.cost) {
 				bestSol = new Solution<E>(incumbentSol);
