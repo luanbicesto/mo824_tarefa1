@@ -76,6 +76,8 @@ public abstract class AbstractGRASP<E> {
 	protected ArrayList<E> RCL;
 	
 	protected ArrayList<Integer> CLRemovedVariables;
+	
+	protected Integer count;
 
 	/**
 	 * Creates the Candidate List, which is an ArrayList of candidate elements
@@ -146,12 +148,14 @@ public abstract class AbstractGRASP<E> {
 	 * @return A feasible solution to the problem being minimized.
 	 */
 	public Solution<E> constructiveHeuristic() {
-
+		count = 0;
 		CL = makeCL();
 		RCL = makeRCL();
 		CLRemovedVariables = new ArrayList<Integer>();
 		incumbentSol = createEmptySol();
 		incumbentCost = Double.POSITIVE_INFINITY;
+		int len = CL.size();
+		double rate;
 
 		/* Main loop, which repeats until the stopping criteria is reached. */
 		while (!constructiveStopCriteria()) {
@@ -187,12 +191,15 @@ public abstract class AbstractGRASP<E> {
 			int rndIndex = rng.nextInt(RCL.size());
 			E inCand = RCL.get(rndIndex);
 			CL.remove(inCand);
+			count += 1;
+			rate = (double)count/len;
+			if( (rate >= 0.4 && rate <= 0.5) || rate >= 0.8 )
+				localSearch();
 			incumbentSol.add(inCand);
 			ObjFunction.evaluate(incumbentSol); //we can remove this maybe, because there is another call to the same method above
 			RCL.clear();
 
 		}
-
 		return incumbentSol;
 	}
 
